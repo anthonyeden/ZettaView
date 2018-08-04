@@ -1,0 +1,14 @@
+Simple build instructions:
+------------------------------------------------------------------------
+
+Ensure you have PyInstaller installed
+Ensure you have 32-bit Python 2.7 installed
+
+Delete build/ & dist/
+
+Run:
+ - pyinstaller -p libs --onefile --add-data "templates;templates" --add-data "static;static" --version-file=version.py app.py
+
+Copy config-sample.json to dist/
+
+ZIP up the dist/ folder and distribute as needed

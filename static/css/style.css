@@ -1,0 +1,142 @@
+body {
+    background-color: #000;
+    color: #FFF;
+    font-family: sans-serif;
+}
+
+.row {
+    overflow: hidden;
+    text-align: center;
+}
+.col_3 {
+    width: 19%;
+    margin: 1%;
+    display: inline-block;
+    text-align: center;
+
+    padding: 10px;
+    border: 1px solid #EEE;
+    border-radius: 5px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 1.8em;
+    padding: 1em;
+    font-weight: 900;
+}
+
+.stationinfo h1 {
+    font-size: 1.2em;
+    margin: 0;
+    padding: 0  0 10px 0;
+}
+.stationinfo h2 {
+    font-size: 1.8em;
+    margin: 0;
+    padding: 0;
+}
+
+#log .entry {
+    border: 1px solid #FFF;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 5px;
+    position: relative;
+
+    font-weight: 600;
+}
+#log .entry h2 {
+    display: inline-block;
+}
+
+#log .entry .percentage {
+    background-color: #EEE;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: -100;
+
+    background: #44802a; /* Old Browsers */
+    background: -webkit-linear-gradient(bottom,#44802a,#7fff00); /*Safari 5.1-6*/
+    background: -o-linear-gradient(bottom,#44802a,#7fff00); /*Opera 11.1-12*/
+    background: -moz-linear-gradient(bottom,#44802a,#7fff00); /*Fx 3.6-15*/
+    background: linear-gradient(to top, #44802a, #7fff00); /*Standard*/
+}
+#log .entry.ending .percentage {
+    background: #ec7474; /* Old Browsers */
+    background: -webkit-linear-gradient(top,#ec7474,#ff0000); /*Safari 5.1-6*/
+    background: -o-linear-gradient(top,#ec7474,#ff0000); /*Opera 11.1-12*/
+    background: -moz-linear-gradient(top,#ec7474,#ff0000); /*Fx 3.6-15*/
+    background: linear-gradient(to bottom, #ec7474, #ff0000); /*Standard*/
+}
+
+#log .entry .timer {
+    position: absolute;
+    right: 5px;
+    color: #FFF;
+    top: 30%;
+}
+
+#log2 {
+    display: none;
+}
+
+#log .entry .chain {
+    position: absolute;
+    top: 5px;
+    right: 60px;
+
+    background-size: contain;
+    width: 25px;
+    height: 25px;
+}
+
+
+#log .entry .chain.chain_Stop {
+    background-image: url('../img/chain_stop.png');
+}
+#log .entry .chain.chain_Segue {
+    background-image: url('../img/chain_segue.png');
+}
+#log .entry .chain.chain_Link {
+    background-image: url('../img/chain_link.png');
+}
+
+#log .entry .assettype {
+    background-size: contain;
+    width: 20px;
+    height: 20px;
+    margin: -5px 0;
+    display: inline-block;
+}
+#log .entry .assettype.asset_Spot {
+    background-image: url('../img/asset_spot.png');
+}
+#log .entry .assettype.asset_Song {
+    background-image: url('../img/asset_song.png');
+}
+#log .entry .assettype.asset_Link {
+    background-image: url('../img/asset_link.png');
+}
+#log .entry .assettype.asset_VoiceTrack {
+    background-image: url('../img/asset_voicetrack.png');
+}
+
+a, a:hover, a:active {
+    color: #FFF;
+}
+
+ul {
+    list-style-type: circle;
+    margin-left: 1.5em;
+}
+li {
+    padding: 5px;
+}
+
+#credit {
+    text-align: center;
+    padding: 10px;
+}

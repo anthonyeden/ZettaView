@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+    <title>ZettaView</title>
+    <meta name="viewport" content="width=600px, initial-scale=1">
+    <link rel="stylesheet" href="static/css/reset.css" />
+    <link rel="stylesheet" href="static/css/style.css" />
+    <script src="static/js/jquery-3.2.1.min.js"></script>
+</head>
+
+<body id="home">
+
+    <h1>ZettaView</h1>
+    <h2>Select a station</h2>
+    <ul>
+    {% for station in stations %}
+        <li><a href="view/{{ station['ID'] }}/">{{ station['Name'] }}</a></li>
+    {% endfor %}
+    </ul>
+
+</body>
+</html>

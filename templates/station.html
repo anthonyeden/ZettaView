@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+    <title>ZettaView</title>
+    <meta name="viewport" content="width=600px, initial-scale=1">
+    <link rel="stylesheet" href="../../static/css/reset.css" />
+    <link rel="stylesheet" href="../../static/css/style.css" />
+    <script src="../../static/js/jquery-3.2.1.min.js"></script>
+</head>
+
+<body id="home">
+
+    <div class="row stationinfo">
+        <div class="col_3">
+            <h1>ZettaView</h1>
+            <h2 id="station_name"></h2>
+        </div>
+        <div class="col_3">
+            <h1>Next Marker</h1>
+            <h2 id="station_etm"></h2>
+        </div>
+        <div class="col_3">
+            <h1>Gap</h1>
+            <h2 id="station_gap"></h2>
+         </div>
+        <div class="col_3">
+            <h1>Next Stop</h1>
+            <h2 id="station_stop"></h2>
+        </div>
+    </div>
+
+    
+
+    <div id="log">
+        <!-- Log events added by JS -->
+    </div>
+
+    <div id="log2">
+        <!-- Holding DOM area for Log events added by JS -->
+    </div>
+    
+    <div id="credit">
+        ZettaView - Created by <a href="https://mediarealm.com.au/">Anthony Eden</a>
+    </div>
+
+    <script type="text/javascript">
+
+        var lastConnectionContact = Date.now();
+    
+        function timerCalcDisplay(timeRemaining) {
+            timeRemainingOrig = timeRemaining * 1000;
+            timeRemaining = Math.abs(timeRemainingOrig);
+
+            var seconds = formatTimeNum(Math.floor((timeRemaining / 1000) % 60));
+            var minutes = formatTimeNum(Math.floor((timeRemaining / (60 * 1000)) % 60));
+            var hours = Math.floor(timeRemaining / (3600 * 1000));
+            var days = Math.floor(timeRemaining / (86400 * 1000));
+            
+            if(timeRemainingOrig > 0) {
+                sign = "";
+            } else {
+                sign = "-";
+            }
+
+            if(timeRemaining <= 3600000) {
+                return sign + minutes + ":" + seconds;
+            } else {
+                return sign + hours + ":" + minutes + ":" + seconds;
+            }
+        }
+
+        function formatTimeNum(i) {
+            if (i < 10) {
+                i = "0" + i;
+            }
+            return i;
+        }
+
+        function formatTimestamp(DateObj) {
+            var h = DateObj.getHours();
+            var m = formatTimeNum(DateObj.getMinutes());
+            var s = formatTimeNum(DateObj.getSeconds());
+            
+            return h + ":" + m + ":" + s;
+        }
+
+        function clockTick() {
+            //Update realtime countdown timers
+
+            currentMillis = (new Date()).getTime();
+
+            $('.timer-countdown').each(function(i, obj) {
+                endTime = $(obj).attr("data-endTime");
+                timeRemaining = endTime - currentMillis;
+                
+                if(endTime == "0") {
+                    return;
+                }
+
+                $(obj).html(timerCalcDisplay(timeRemaining / 1000));
+
+            });
+
+            $('.timer-percentage').each(function(i, obj) {
+                startTime = $(obj).attr("data-startTime");
+                endTime = $(obj).attr("data-endTime");
+
+                duration = endTime - startTime;
+                elapsed = new Date() - startTime;
+
+                percentage = elapsed / duration * 100;
+
+                if(percentage > 100) {
+                    percentage = 100;
+                }
+
+                if(elapsed <= 0 || duration <= 0) {
+                    percentage = 0;
+                }
+
+                $(obj).css('width', percentage+'%');
+
+            });
+
+            //Set the timeout:
+            nextSecondInMilis = Math.ceil(currentMillis / 1000) * 1000;
+            timeUntilUpdate = nextSecondInMilis - currentMillis;
+            setTimeout( function() { updateZettaLogData() } , timeUntilUpdate);
+
+        }
+
+        function updateZettaLogData() {
+            $.ajaxSetup({ cache: false });
+            $.getJSON("../../data/{{ station_id }}/", function(station) {
+                events = station.eventQueue;
+                
+                lastConnectionContact = Date.now();
+
+                // Clear everything out of the log
+                $("#log2").html("");
+
+                // Update station-specific details
+                $("#station_name").html(station.stationName);
+
+                if(station.etm !== null) {
+                    a = station.etm.split(/[^0-9]/);
+                    etmLocal = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5]);
+                    $("#station_etm").html(formatTimestamp(etmLocal));
+                }
+
+                if(station.status == "ON-AIR") {
+                    // Currently playing
+                    $("#station_gap").html(""+timerCalcDisplay(station.gapTime));
+
+                } else if(station.gapTimeCountdownTarget !== null) {
+                    // Live countdown
+                    a = station.gapTimeCountdownTarget.split(/[^0-9]/);
+                    gapCountdownLocal = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5]);
+                    $("#station_gap").html("<span class=\"timer-countdown\" data-endTime=\""+gapCountdownLocal.getTime()+"\"></span>");
+                }
+
+                if(station.nextStop !== null) {
+                    a = station.nextStop.split(/[^0-9]/);
+                    nextStopLocal = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5]);
+                    $("#station_stop").html("<span class=\"timer-countdown\" data-endTime=\""+nextStopLocal.getTime()+"\"></span>");
+                } else {
+                    $("#station_stop").html("N/A");
+                }
+
+                for(var i in events) {
+                    var eventData = events[i].Event;
+
+                    classes = "";
+                    percentagePlayed = Math.floor(eventData.CurrentPositionInSeconds / eventData.DurationToSegueInSeconds * 100);
+                    timeDisplay = timerCalcDisplay(Math.floor(eventData.DurationToSegueInSeconds));
+
+                    if(eventData.Status == "Current") {
+                        classes += " playing";
+                        timeDisplay = timerCalcDisplay(eventData.DurationToSegueInSeconds - eventData.CurrentPositionInSeconds);
+                        
+                        a = eventData.AirTime.split(/[^0-9]/);
+                        startTimeLocal = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5]);
+                        
+                        startTime = Math.round(startTimeLocal.getTime());
+                        endTime = Math.round(startTimeLocal.getTime() + eventData.DurationToSegueInSeconds * 1000);
+                    } else {
+                        startTime = 0;
+                        endTime = 0;
+                    }
+
+                    // Change styling when an item is about to end
+                    if(percentagePlayed >= 90) {
+                        classes += " ending";
+                    }
+
+                    titleLine = "";
+                    if(eventData.Title !== null && eventData.Artist !== null) {
+                        titleLine = eventData.Title+' - '+eventData.Artist;
+                    } else if(eventData.Title !== null) {
+                        titleLine = eventData.Title;
+                    } else if(eventData.Artist !== null) {
+                        titleLine = eventData.Artist;
+                    }
+
+                    // Add this item to the log
+                    $("#log2").append('\
+                        <div class="entry '+classes+'" id="Event_'+eventData.EventID+'">\
+                            <div class="percentage timer-percentage" data-startTime="'+startTime+'" data-endTime="'+endTime+'"></div>\
+                            <span class="assettype asset_'+eventData.AssetType+'"></span>\
+                            <h2>'+titleLine+'</h2>\
+                            <span class="chain chain_'+eventData.ChainType+'"></span>\
+                            <span class="timer timer-countdown" data-endTime="'+endTime+'">'+timeDisplay+'</span>\
+                        </div>');
+                }
+
+                $("#log").html($("#log2").html());
+
+                clockTick();
+
+            });
+        }
+        
+        function checkConnection() {
+            if(lastConnectionContact <= Date.now() - 5000) {
+                clockTick();
+            }
+        }
+
+        clockTick();
+        setInterval(function(){ checkConnection(); }, 5000);
+
+    </script>
+
+</body>
+</html>
