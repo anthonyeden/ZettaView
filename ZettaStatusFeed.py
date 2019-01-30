@@ -35,6 +35,8 @@ def helper_UTCToLocal(datetime_utc):
 
 def listStations():
     response = client.GetStations()
+    if 'Stations' in response['GetStationsResult']:
+        return response['GetStationsResult']['Stations']
     return response['GetStationsResult']
 
 def stationMetadata(stationId):
