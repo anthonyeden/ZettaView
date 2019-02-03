@@ -35,8 +35,13 @@ def helper_UTCToLocal(datetime_utc):
 
 def listStations():
     response = client.GetStations()
-    if 'Stations' in response['GetStationsResult']:
-        return response['GetStationsResult']['Stations']
+
+    if 'Station' in response['GetStationsResult']:
+        return_data = []
+        for station in response['GetStationsResult']['Station']:
+                return_data.append({'Station': station})
+        return return_data
+
     return response['GetStationsResult']
 
 def stationMetadata(stationId):
@@ -65,15 +70,22 @@ def stationQueue(stationId):
     response = client.GetStationFull(stationId)
     queue = response['GetStationFullResult']['Queue']
 
+    if 'Event' in queue:
+        enumerate_data = []
+        for x in queue['Event']:
+            enumerate_data.append({'Event': x})
+    else:
+        enumerate_data = queue
+
     # Calculate local times and translate codes
     for i,item in enumerate(queue):
-        queue[i]['Event']['AirTime'] = helper_UTCToLocal(item['Event']['AirTimeUtc'])
-        queue[i]['Event']['AssetType'] = ZettaCodes.AssetType(item['Event']['AssetType'])
-        queue[i]['Event']['ChainType'] = ZettaCodes.ChainType(item['Event']['ChainType'])
-        queue[i]['Event']['EditCode'] = ZettaCodes.Edit(item['Event']['EditCode'])
-        queue[i]['Event']['Status'] = ZettaCodes.EventStatus(item['Event']['Status'])
+        enumerate_data[i]['Event']['AirTime'] = helper_UTCToLocal(item['Event']['AirTimeUtc'])
+        enumerate_data[i]['Event']['AssetType'] = ZettaCodes.AssetType(item['Event']['AssetType'])
+        enumerate_data[i]['Event']['ChainType'] = ZettaCodes.ChainType(item['Event']['ChainType'])
+        enumerate_data[i]['Event']['EditCode'] = ZettaCodes.Edit(item['Event']['EditCode'])
+        enumerate_data[i]['Event']['Status'] = ZettaCodes.EventStatus(item['Event']['Status'])
 
-    return queue
+    return enumerate_data
 
 def stationQueueNextStop(stationId):
     # Finds the time of the next stop for the given station
