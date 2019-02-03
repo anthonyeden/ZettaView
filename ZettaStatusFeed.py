@@ -78,7 +78,7 @@ def stationQueue(stationId):
         enumerate_data = queue
 
     # Calculate local times and translate codes
-    for i,item in enumerate(queue):
+    for i,item in enumerate(enumerate_data):
         enumerate_data[i]['Event']['AirTime'] = helper_UTCToLocal(item['Event']['AirTimeUtc'])
         enumerate_data[i]['Event']['AssetType'] = ZettaCodes.AssetType(item['Event']['AssetType'])
         enumerate_data[i]['Event']['ChainType'] = ZettaCodes.ChainType(item['Event']['ChainType'])
